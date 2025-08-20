@@ -1,6 +1,5 @@
 # Grupo 1 FunBio
 ## Equipo 3
-![Presentacion](Imagenes/Presentación Diapositivas Propuesta Proyecto Negocios Simple Geométrico Verde.png)
 Somos alumnos de 4to ciclo de la carrera de Ingeniería Biomédica y estamos aquí para hacer el mundo un lugar mejor.
 
 ## Miembros 
@@ -24,4 +23,21 @@ Rol: Gestor de repositorio
 Responsabilidades: 
 - Actualizar información del trabajo
 - Descargar y subir archivos(Repositorio)
-### 
+### Nathalie Huiza 
+Edad: 18
+Responsabilidad: 
+•Diseño y prototipado 
+•Actualizar  información
+•Pruebas finales
+### Jean Neira
+Edad: 18
+Rol: Diseño y prototipado
+Responsabilidad: 
+•Pruebas finales
+### Fabio Iván García Soto
+Edad: 19 años
+Rol: Diseño y programación
+Responsabilidades:
+- Programación del prototipo
+- Verificación del correcto funcionamiento del prototipo
+- Prueba y ajuste.
