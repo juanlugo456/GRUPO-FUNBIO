@@ -28,14 +28,16 @@ Responsabilidades:
 ### Nathalie Huiza 
 Edad: 18
 Responsabilidad: 
-•Diseño y prototipado 
-•Actualizar  información
-•Pruebas finales
+- Diseño y prototipado
+- Actualizar  información
+- Pruebas finales
 ### Jean Neira
 Edad: 18
 Rol: Diseño y prototipado
 Responsabilidad: 
-•Pruebas finales
+- Pruebas finales
+- Registro de los materiales
+- Apoyo moral
 ### Fabio Iván García Soto
 Edad: 19 años
 Rol: Diseño y programación
