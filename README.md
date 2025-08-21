@@ -7,8 +7,8 @@ Somos alumnos de 4to ciclo de la carrera de Ingeniería Biomédica y estamos aqu
 ## Miembros 
 ### Juan Carlos Lugo Rodriguez
 Edad:19
-Rol: Coordinador
-/Responsabilidades:
+Rol: Coordinador  
+Responsabilidades:  
 - Estar pendientes de los avances del grupo
 - Colaborar y ayudar en los avances
 - Envio de los trabajos al Blackboard
