@@ -21,13 +21,15 @@ Responsabilidades:
 - Diseño 3D
 - Elaboración de presentaciones e informes
 - Prueba y ajuste.
-### Lorena Mendez Saavedra 
+### Lorena Mendez Saavedra  
+![Imagenfoto4](https://github.com/juanlugo456/GRUPO-FUNBIO/blob/f34e1d42c328eeb142332a92f73c9bdeab4aa3a1/Imagenes/WhatsApp%20Image%202025-08-20%20at%205.45.10%20PM.jpeg)  
 Edad: 18 años  
 Rol: Gestor de repositorio  
 Responsabilidades: 
 - Actualizar información del trabajo
 - Descargar y subir archivos(Repositorio)
-### Nathalie Huiza 
+### Nathalie Huiza  
+![Imagenfoto5](https://github.com/juanlugo456/GRUPO-FUNBIO/blob/f34e1d42c328eeb142332a92f73c9bdeab4aa3a1/Imagenes/WhatsApp%20Image%202025-08-20%20at%205.46.18%20PM.jpeg)
 Edad: 18  
 Rol: Prototipado y armado  
 Responsabilidad: 
