@@ -6,6 +6,7 @@ Somos alumnos de 4to ciclo de la carrera de Ingeniería Biomédica y estamos aqu
 
 ## Miembros 
 ### Juan Carlos Lugo Rodriguez
+![Imagenfoto1](https://github.com/juanlugo456/GRUPO-FUNBIO/blob/77578e7608d1776f8aa93059d60186b983f800f6/Imagenes/WhatsApp%20Image%202025-08-20%20at%205.36.05%20PM.jpeg)
 Edad:19 años    
 Rol: Coordinador  
 Responsabilidades:
