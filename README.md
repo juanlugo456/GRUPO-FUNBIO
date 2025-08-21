@@ -35,6 +35,7 @@ Responsabilidad:
 - Actualizar  información
 - Pruebas finales
 ### Jean Neira
+![Imagenfoto5](https://github.com/juanlugo456/GRUPO-FUNBIO/blob/29890fdb8cbb5a0e914746a61a1684198304caf1/Imagenes/WhatsApp%20Image%202025-08-20%20at%205.40.20%20PM.jpeg)
 Edad: 18  
 Rol: Diseño y prototipado  
 Responsabilidad: 
