@@ -42,6 +42,7 @@ Responsabilidad:
 - Registro de los materiales
 - Apoyo moral
 ### Fabio Iván García Soto
+![Imagenfoto6](https://github.com/juanlugo456/GRUPO-FUNBIO/blob/98d20677ae121e1e5059806ea0f0e0472ccd1b5c/Imagenes/WhatsApp%20Image%202025-08-20%20at%205.39.54%20PM.jpeg)
 Edad: 19 años  
 Rol: Diseño y programación  
 Responsabilidades:
