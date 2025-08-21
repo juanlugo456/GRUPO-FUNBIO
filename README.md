@@ -14,6 +14,7 @@ Responsabilidades:
 - Colaborar y ayudar en los avances
 - Envio de los trabajos al Blackboard
 ### Ignacio Pérez Vargas
+![Imagenfoto2](https://github.com/juanlugo456/GRUPO-FUNBIO/blob/77578e7608d1776f8aa93059d60186b983f800f6/Imagenes/WhatsApp%20Image%202025-08-20%20at%205.38.43%20PM.jpeg)
 Edad: 18 años  
 Rol: Programador y Prototipado  
 Responsabilidades:
