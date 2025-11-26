@@ -1,1 +1,314 @@
+DETECTOR
 
+#include <SoftwareSerial.h>
+
+// --- Bluetooth ---
+#define BT_RX 10 // Arduino RX <- HC-05 TX
+#define BT_TX 9  // Arduino TX -> HC-05 RX
+SoftwareSerial BTSerial(BT_RX, BT_TX);
+
+// --- Sensores FSR ---
+const int fsrPins[6] = {A0, A1, A2, A3, A4, A5};
+int fsrValores[6];
+int fsrPrevios[6];
+
+// --- Parámetros de detección ---
+const int umbralMovimiento = 20;              
+const unsigned long tiempoCongelado = 2000;   
+const unsigned long intervaloLectura = 100;  
+
+// --- Estado ---
+bool freezingDetectado = false;
+unsigned long tiempoUltimoMovimiento = 0;
+
+void setup() {
+  Serial.begin(9600);
+  BTSerial.begin(9600);
+
+  Serial.println("=== DETECTOR MOTIO ===");
+  Serial.println("FSR1\tFSR2\tFSR3\tFSR4\tFSR5\tFSR6");
+
+  for (int i = 0; i < 6; i++) {
+    fsrPrevios[i] = analogRead(fsrPins[i]);
+  }
+  tiempoUltimoMovimiento = millis();
+}
+
+void loop() {
+  unsigned long ahora = millis();
+  static unsigned long ultimaLectura = 0;
+
+  if (ahora - ultimaLectura >= intervaloLectura) {
+    ultimaLectura = ahora;
+
+    for (int i = 0; i < 6; i++) {
+      fsrValores[i] = analogRead(fsrPins[i]);
+      Serial.print(fsrValores[i]);
+      Serial.print("\t");
+    }
+    Serial.println();
+
+    int variacionPromedio = calcularVariacionPromedio();
+
+    if (variacionPromedio > umbralMovimiento) {
+      tiempoUltimoMovimiento = ahora;
+
+      if (freezingDetectado) {
+        freezingDetectado = false;
+        BTSerial.println("STOP");
+        Serial.println("FREEZE FINALIZADO");
+      }
+    } 
+    else if (!freezingDetectado && (ahora - tiempoUltimoMovimiento >= tiempoCongelado)) {
+      freezingDetectado = true;
+      BTSerial.println("FREEZE");
+      Serial.println("FREEZING DETECTADO");
+    }
+  }
+}
+
+int calcularVariacionPromedio() {
+  long suma = 0;
+  for (int i = 0; i < 6; i++) {
+    int dif = abs(fsrValores[i] - fsrPrevios[i]);
+    suma += dif;
+    fsrPrevios[i] = fsrValores[i];
+  }
+  return suma / 6;
+}
+
+ACTUADOR
+
+#include <LiquidCrystal.h>
+#include <SoftwareSerial.h>
+
+// --- Bluetooth ---
+#define BT_RX 10 // Arduino RX <- HC-05 TX
+#define BT_TX 9  // Arduino TX -> HC-05 RX
+SoftwareSerial BTSerial(BT_RX, BT_TX);
+
+// --- Pines ---
+const int pinVibrador = 6;                // PWM al transistor
+const int pinPulsadorFrecuencia = 8;      // Botón frecuencia
+const int pinPulsadorIntensidad = 7;      // Botón intensidad
+
+// --- LCD (según tu esquema) ---
+// RS, E, D4, D5, D6, D7
+LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
+
+// --- Variables globales ---
+int nivelFrecuencia = 1;   // 1..4 → 1.0, 1.5, 2.0, 2.5 Hz
+int nivelIntensidad = 1;   // 1..4 (PWM ya definido)
+bool estadoFreezing = false;
+
+// --- Debounce ---
+int estadoAnteriorFrec = HIGH;
+int estadoAnteriorInt = HIGH;
+unsigned long lastDebounceFrec = 0;
+unsigned long lastDebounceInt = 0;
+const unsigned long debounceDelay = 50;
+
+// --- Pantalla ---
+bool mostrandoConfig = false;
+unsigned long tiempoUltimaPulsacion = 0;
+const unsigned long tiempoMostrar = 2000;
+
+// --- Vibración ---
+unsigned long ultimoCambioVibra = 0;
+unsigned long tiempoInicioFreeze = 0;
+const unsigned long duracionVibracion = 10000;
+bool vibraEncendido = false;
+
+// --- Tablas ISO (frecuencia e intensidad) ---
+int periodoPorNivel[] = {0, 1000, 667, 500, 400};   // ms (1.0, 1.5, 2.0, 2.5 Hz)
+int pwmPorNivel[]     = {0, 180, 220, 255, 255};    // Intensidades ISO + a través de ropa
+
+// =====================================================
+//                     SETUP
+// =====================================================
+void setup() {
+  pinMode(pinVibrador, OUTPUT);
+  pinMode(pinPulsadorFrecuencia, INPUT_PULLUP);
+  pinMode(pinPulsadorIntensidad, INPUT_PULLUP);
+
+  lcd.begin(16, 2);
+  BTSerial.begin(9600);
+  Serial.begin(9600);
+
+  // Mensaje INICIANDO
+  lcd.clear();
+  lcd.setCursor(2, 0);
+  lcd.print("INICIANDO...");
+  delay(1200);
+
+  lcd.clear();
+  lcd.setCursor(4, 0);
+  lcd.print("MOTIO");
+  lcd.setCursor(1, 1);
+  lcd.print("SYSTEM READY");
+  delay(2000);
+
+  // Mensaje predeterminado
+  lcd.clear();
+  lcd.setCursor(4, 0);
+  lcd.print("MOTIO");
+
+  Serial.println("=== ACTUADOR MOTIO INICIADO ===");
+}
+
+// =====================================================
+//                       LOOP
+// =====================================================
+void loop() {
+  unsigned long ahora = millis();
+
+  // --- Bluetooth ---
+  if (BTSerial.available()) {
+    String msg = BTSerial.readStringUntil('\n');
+    msg.trim();
+
+    if (msg.equalsIgnoreCase("FREEZE")) {
+      estadoFreezing = true;
+      tiempoInicioFreeze = ahora;
+
+      lcd.clear();
+      lcd.setCursor(2, 0);
+      lcd.print("FREEZING");
+      lcd.setCursor(3, 1);
+      lcd.print("DETECTED");
+
+      Serial.println("FREEZING DETECTED");
+    }
+
+    else if (msg.equalsIgnoreCase("STOP")) {
+      estadoFreezing = false;
+      lcd.clear();
+      lcd.setCursor(4, 0);
+      lcd.print("MOTIO");
+      apagarVibrador();
+      Serial.println("Fin del freezing");
+    }
+  }
+
+  // --- Vibración si hay FREEZE ---
+  if (estadoFreezing) {
+    if (ahora - tiempoInicioFreeze <= duracionVibracion) {
+      controlarVibracion(ahora);
+    } else {
+      estadoFreezing = false;
+      apagarVibrador();
+      lcd.clear();
+      lcd.setCursor(4, 0);
+      lcd.print("MOTIO");
+    }
+  }
+
+  // --- Botones ---
+  leerPulsadorFrecuencia(ahora);
+  leerPulsadorIntensidad(ahora);
+
+  // Restaurar pantalla MOTIO
+  if (mostrandoConfig && (ahora - tiempoUltimaPulsacion >= tiempoMostrar) && !estadoFreezing) {
+    lcd.clear();
+    lcd.setCursor(4, 0);
+    lcd.print("MOTIO");
+    mostrandoConfig = false;
+  }
+}
+
+// =====================================================
+//                CONTROL DE VIBRACIÓN
+// =====================================================
+void controlarVibracion(unsigned long ahora) {
+  int periodo = periodoPorNivel[nivelFrecuencia];
+  int intensidadPWM = pwmPorNivel[nivelIntensidad];
+  int tiempoActivo = periodo / 2;
+
+  if (vibraEncendido && (ahora - ultimoCambioVibra >= tiempoActivo)) {
+    apagarVibrador();
+    vibraEncendido = false;
+  }
+  else if (!vibraEncendido && (ahora - ultimoCambioVibra >= periodo)) {
+    analogWrite(pinVibrador, intensidadPWM);
+    vibraEncendido = true;
+    ultimoCambioVibra = ahora;
+  }
+}
+
+void apagarVibrador() {
+  analogWrite(pinVibrador, 0);
+}
+
+// =====================================================
+//                 BOTÓN DE FRECUENCIA
+// =====================================================
+void leerPulsadorFrecuencia(unsigned long ahora) {
+  int lectura = digitalRead(pinPulsadorFrecuencia);
+  if (lectura != estadoAnteriorFrec) lastDebounceFrec = ahora;
+
+  if ((ahora - lastDebounceFrec) > debounceDelay) {
+    static int stableState = HIGH;
+    if (lectura != stableState) {
+      stableState = lectura;
+
+      if (stableState == LOW && !estadoFreezing) {
+        nivelFrecuencia++;
+        if (nivelFrecuencia > 4) nivelFrecuencia = 1;
+
+        mostrarLCD_Frecuencia();
+        tiempoUltimaPulsacion = ahora;
+        mostrandoConfig = true;
+      }
+    }
+  }
+  estadoAnteriorFrec = lectura;
+}
+
+// =====================================================
+//                BOTÓN DE INTENSIDAD
+// =====================================================
+void leerPulsadorIntensidad(unsigned long ahora) {
+  int lectura = digitalRead(pinPulsadorIntensidad);
+  if (lectura != estadoAnteriorInt) lastDebounceInt = ahora;
+
+  if ((ahora - lastDebounceInt) > debounceDelay) {
+    static int stableState = HIGH;
+    if (lectura != stableState) {
+      stableState = lectura;
+
+      if (stableState == LOW && !estadoFreezing) {
+        nivelIntensidad++;
+        if (nivelIntensidad > 4) nivelIntensidad = 1;
+
+        mostrarLCD_Intensidad();
+        tiempoUltimaPulsacion = ahora;
+        mostrandoConfig = true;
+      }
+    }
+  }
+  estadoAnteriorInt = lectura;
+}
+
+// =====================================================
+//                    LCD MENSAJES
+// =====================================================
+void mostrarLCD_Frecuencia() {
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("Frecuencia:");
+
+  float hz = 1000.0 / periodoPorNivel[nivelFrecuencia];
+  lcd.setCursor(0, 1);
+  lcd.print(hz, 1);
+  lcd.print(" Hz");
+}
+
+void mostrarLCD_Intensidad() {
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("Intensidad:");
+
+  lcd.setCursor(0, 1);
+  lcd.print("Nivel ");
+  lcd.print(nivelIntensidad);   // Ahora se muestra 1–4
+}
